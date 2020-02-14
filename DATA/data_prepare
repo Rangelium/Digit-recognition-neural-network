@@ -1,0 +1,82 @@
+#!/bin/bash
+
+echo "Start of division part"
+echo "Trying to remove train_data_1 and train_data_2 if exist"
+rm -r train_data_1
+rm -r train_data_2
+
+echo "Copying $1 directory to train_data_1 directory"
+cp -r $1 train_data_1
+echo "Successfully copied"
+
+echo "Creating train_data_2 directory"
+mkdir train_data_2
+cd train_data_2
+for i in {0..11}
+do
+	mkdir $i
+done
+cd ..
+echo "Created"
+
+echo "Begin of dividing"
+for i in {0..11}
+do
+	cd train_data_1/$i
+	num_of_files=$(ls | wc -l)
+	cd ../..
+	counter=0
+	echo "Dividing train_data_1/$i directory"
+	for ((j=$((num_of_files/2)); j<$num_of_files; j++))
+	do
+		cp train_data_1/$i/$j.jpg train_data_2/$i
+		mv train_data_2/$i/$j.jpg train_data_2/$i/$counter.jpg 
+		counter=$((counter+1))
+		rm train_data_1/$i/$j.jpg
+	done
+done
+
+echo "Division successfully done!"
+
+echo ""
+echo ""
+
+echo "Start of creation test directories"
+echo "Trying to remove test_data_1 and test_data_2 if exist"
+rm -r test_data_1
+rm -r test_data_2
+
+for z in {1..2}
+do
+	echo "Creating test_data_$z directory"
+	mkdir test_data_$z
+	echo "Created"
+	for i in {0..11}
+	do
+		cd train_data_$z/$i
+		num_of_files=$(ls | wc -l)
+		cd ../..
+		counter=0
+		echo "Creating test_data_$z/$i folder"
+		mkdir test_data_$z/$i
+		for ((j=$((num_of_files*17/20)); j<$num_of_files; j++))
+		do
+			cp train_data_$z/$i/$j.jpg test_data_$z/$i
+			mv test_data_$z/$i/$j.jpg test_data_$z/$i/$counter.jpg 
+			counter=$((counter+1))
+			rm train_data_$z/$i/$j.jpg
+		done
+	done
+done
+
+echo "Creation of test directories successfully done!"
+
+echo "Nearly ended..."
+mkdir DATASET_1
+mv train_data_1 DATASET_1
+mv test_data_1 DATASET_1
+
+mkdir DATASET_2
+mv train_data_2 DATASET_2
+mv test_data_2 DATASET_2
+echo "Finished!"
